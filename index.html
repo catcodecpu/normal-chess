@@ -1,70 +1,205 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Normal Chess — Totally Fair Chess</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.4.0/chess.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Normal Chess</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(ellipse at top, #34312b, #151412 75%);
+            color: #eee5d3;
+            font-family: Georgia, serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            letter-spacing: 4px;
+            color: #e4c995;
+            text-shadow: 0 3px 8px #000;
+        }
+
+        #board {
+            width: min(92vw, 560px);
+            aspect-ratio: 1;
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            grid-template-rows: repeat(8, minmax(0, 1fr));
+            margin: 25px auto;
+            border: 10px solid #53351f;
+            outline: 3px solid #a77b48;
+            box-shadow: 0 15px 35px #000b;
+            overflow: hidden;
+            gap: 0;
+            padding: 0;
+        }
+
+        .square {
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            min-height: 0;
+            border: none !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Segoe UI Symbol", "DejaVu Sans", serif;
+            font-size: clamp(24px, 7vw, 58px);
+            line-height: 1;
+            cursor: pointer;
+            text-shadow: 0 2px 3px #0005;
+        }
+
+        .light {
+            background: #e8d5b5 !important;
+            color: #fffaf0;
+        }
+
+        .dark {
+            background: #805333 !important;
+            color: #21150e;
+        }
+
+        .selected {
+            background: #e5c34f !important;
+        }
+
+        .possible {
+            box-shadow: inset 0 0 0 4px #d6bd55;
+        }
+
+        button, input, select {
+            padding: 11px 16px;
+            margin: 5px;
+            border: 1px solid #9a7445;
+            border-radius: 5px;
+            background: #35271d;
+            color: #f4e5c9;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #62452d;
+        }
+
+        #adminPanel {
+            display: none;
+            background: #29231d;
+            border: 1px solid #a77b48;
+            border-radius: 10px;
+            padding: 18px;
+            margin: 20px auto;
+            max-width: 450px;
+        }
+
+        #message {
+            color: #e9c66c;
+            min-height: 24px;
+        }
+
+        #status {
+            color: #e4c995;
+            font-size: 18px;
+        }
+
+        #roomStatus {
+            margin: 10px;
+            color: #e4c995;
+        }
+
+        hr {
+            border-color: #755437;
+        }
+
+        .hint {
+            color: #9e927e;
+            font-size: 12px;
+        }
+    </style>
 </head>
+
 <body>
-  <header class="topbar">
-    <div><div class="eyebrow">A COMPLETELY FAIR GAME</div><h1>♟ Normal Chess</h1></div>
-    <span class="pill">Totally normal.</span>
-  </header>
 
-  <main class="layout">
-    <section class="game-panel">
-      <div class="status-row"><strong id="status">White to move</strong><span id="turn">WHITE</span></div>
-      <div id="board" class="board" aria-label="Chess board"></div>
-      <div class="actions">
-        <button id="undoBtn" class="secondary">↶ Undo</button>
-        <button id="resetBtn" class="secondary">Restart</button>
-      </div>
-      <p id="message" class="message">Select a piece, then select a highlighted square.</p>
-    </section>
+    <h1>NORMAL CHESS</h1>
 
-    <aside class="side-panel">
-      <section class="card">
-        <h2>Online room</h2>
-        <p class="muted">Create a room and send the code to your friend.</p>
-        <label>Supabase project URL<input id="supabaseUrl" placeholder="https://your-project.supabase.co"></label>
-        <label>Supabase anon key<input id="supabaseKey" placeholder="Your public anon key"></label>
-        <div class="button-row">
-          <button id="createRoomBtn">Create room</button>
-          <button id="joinRoomBtn" class="secondary">Join room</button>
-        </div>
-        <label>Room code<input id="roomCode" placeholder="Enter room code" maxlength="8"></label>
-        <p id="roomStatus" class="small muted">Not connected. Add your Supabase details to enable online play.</p>
-      </section>
+    <div id="status">White's turn</div>
 
-      <section class="card">
-        <div class="cheat-heading"><h2>Admin panel</h2><span class="pill danger">HOST ONLY</span></div>
-        <p class="muted">Cheats are enabled for the room creator in this prototype.</p>
-        <label>Piece to spawn
-          <select id="spawnPiece">
-            <option value="wq">White Queen</option><option value="wr">White Rook</option>
-            <option value="wb">White Bishop</option><option value="wn">White Knight</option><option value="wp">White Pawn</option>
-            <option value="bq">Black Queen</option><option value="br">Black Rook</option>
-            <option value="bb">Black Bishop</option><option value="bn">Black Knight</option><option value="bp">Black Pawn</option>
-          </select>
-        </label>
-        <button id="spawnModeBtn" class="wide">Spawn piece: OFF</button>
-        <div class="cheat-grid">
-          <button data-cheat="delete" class="secondary">Delete piece</button>
-          <button data-cheat="teleport" class="secondary">Teleport</button>
-          <button data-cheat="queen" class="secondary">Turn into queen</button>
-          <button data-cheat="clear" class="secondary">Clear board</button>
-          <button data-cheat="extraQueens" class="secondary">Queen army</button>
-          <button data-cheat="moveAnywhere" class="secondary">Move anywhere</button>
-        </div>
-        <p id="cheatStatus" class="small muted">Create a room to become its host, or use cheats locally.</p>
-      </section>
-    </aside>
-  </main>
+    <div id="board"></div>
 
-  <footer>Normal Chess · Nothing suspicious happening here.</footer>
-  <script src="game.js"></script>
+    <div id="message"></div>
+
+    <button id="resetBtn">Reset Game</button>
+    <button id="undoBtn">Undo Move</button>
+
+    <hr>
+
+    <h3>Multiplayer</h3>
+
+    <input
+        id="supabaseUrl"
+        placeholder="Supabase URL"
+        autocomplete="off"
+    >
+
+    <input
+        id="supabaseKey"
+        placeholder="Supabase Publishable Key"
+        autocomplete="off"
+    >
+
+    <br>
+
+    <button id="createRoomBtn">Create Room</button>
+
+    <input
+        id="roomCode"
+        placeholder="Room Code"
+        autocomplete="off"
+    >
+
+    <button id="joinRoomBtn">Join Room</button>
+
+    <div id="roomStatus"></div>
+
+    <div id="adminPanel">
+        <h3>Admin Panel</h3>
+
+        <select id="pieceChoice">
+            <option value="q">Queen</option>
+            <option value="r">Rook</option>
+            <option value="b">Bishop</option>
+            <option value="n">Knight</option>
+            <option value="p">Pawn</option>
+        </select>
+
+        <button id="spawnBtn">Spawn Piece</button>
+        <button id="deleteBtn">Delete Piece</button>
+        <button id="closeAdminBtn">Close</button>
+    </div>
+
+    <p class="hint">A completely normal game of chess.</p>
+
+    <!-- Chess engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Your game code -->
+    <script src="game.js"></script>
+
 </body>
 </html>
