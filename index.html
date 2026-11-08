@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Normal Chess — Totally Fair Chess</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/1.4.0/chess.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div><div class="eyebrow">A COMPLETELY FAIR GAME</div><h1>♟ Normal Chess</h1></div>
+    <span class="pill">Totally normal.</span>
+  </header>
+
+  <main class="layout">
+    <section class="game-panel">
+      <div class="status-row"><strong id="status">White to move</strong><span id="turn">WHITE</span></div>
+      <div id="board" class="board" aria-label="Chess board"></div>
+      <div class="actions">
+        <button id="undoBtn" class="secondary">↶ Undo</button>
+        <button id="resetBtn" class="secondary">Restart</button>
+      </div>
+      <p id="message" class="message">Select a piece, then select a highlighted square.</p>
+    </section>
+
+    <aside class="side-panel">
+      <section class="card">
+        <h2>Online room</h2>
+        <p class="muted">Create a room and send the code to your friend.</p>
+        <label>Supabase project URL<input id="supabaseUrl" placeholder="https://your-project.supabase.co"></label>
+        <label>Supabase anon key<input id="supabaseKey" placeholder="Your public anon key"></label>
+        <div class="button-row">
+          <button id="createRoomBtn">Create room</button>
+          <button id="joinRoomBtn" class="secondary">Join room</button>
+        </div>
+        <label>Room code<input id="roomCode" placeholder="Enter room code" maxlength="8"></label>
+        <p id="roomStatus" class="small muted">Not connected. Add your Supabase details to enable online play.</p>
+      </section>
+
+      <section class="card">
+        <div class="cheat-heading"><h2>Admin panel</h2><span class="pill danger">HOST ONLY</span></div>
+        <p class="muted">Cheats are enabled for the room creator in this prototype.</p>
+        <label>Piece to spawn
+          <select id="spawnPiece">
+            <option value="wq">White Queen</option><option value="wr">White Rook</option>
+            <option value="wb">White Bishop</option><option value="wn">White Knight</option><option value="wp">White Pawn</option>
+            <option value="bq">Black Queen</option><option value="br">Black Rook</option>
+            <option value="bb">Black Bishop</option><option value="bn">Black Knight</option><option value="bp">Black Pawn</option>
+          </select>
+        </label>
+        <button id="spawnModeBtn" class="wide">Spawn piece: OFF</button>
+        <div class="cheat-grid">
+          <button data-cheat="delete" class="secondary">Delete piece</button>
+          <button data-cheat="teleport" class="secondary">Teleport</button>
+          <button data-cheat="queen" class="secondary">Turn into queen</button>
+          <button data-cheat="clear" class="secondary">Clear board</button>
+          <button data-cheat="extraQueens" class="secondary">Queen army</button>
+          <button data-cheat="moveAnywhere" class="secondary">Move anywhere</button>
+        </div>
+        <p id="cheatStatus" class="small muted">Create a room to become its host, or use cheats locally.</p>
+      </section>
+    </aside>
+  </main>
+
+  <footer>Normal Chess · Nothing suspicious happening here.</footer>
+  <script src="game.js"></script>
+</body>
+</html>
